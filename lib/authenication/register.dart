@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'mock_auth.dart';
 import 'package:receipt_generator/colors/color.dart';
 import 'login.dart';
 
@@ -11,7 +11,6 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false; // Loading Indicator
 
   /// **🔹 Function to Register User**
@@ -29,15 +28,11 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _isLoading = true); // Show loading indicator
 
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      User? user = userCredential.user; // Retrieve user
+      await MockAuth.register(email, password);
+      final user = email;
 
       if (user != null) {
-        print("✅ User Registered: ${user.email}");
+        print("✅ User Registered: ${user}");
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Registration Successful")),

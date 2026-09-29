@@ -1,7 +1,4 @@
-import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:flutter/services.dart';
@@ -26,7 +23,7 @@ class ProductDetails extends StatefulWidget {
 
 class _ProductDetailsState extends State<ProductDetails> {
   String? selectedProduct;
-  String? _signaturePath;
+  Uint8List? _signaturePath;
   List<Map<String, TextEditingController>> productList = [];
   List<bool> advanceCheckboxes = [false, false, false, false, false];
 
@@ -598,8 +595,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                                       width: 2,
                                     ),
                                   ),
-                                  child: Image.file(
-                                    File(_signaturePath!),
+                                  child: Image.memory(
+                                    _signaturePath!,
                                     fit: BoxFit.contain,
                                   ),
                                 ),
@@ -885,7 +882,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => PdfPreviewPage(pdfFile: pdfFile)),
+            builder: (context) => PdfPreviewPage(pdfBytes: pdfFile)),
       );
 
       // await saveDataFirestore(
@@ -900,7 +897,7 @@ class _ProductDetailsState extends State<ProductDetails> {
     }
   }
 
-  Future<File> generateReceiptPDF() async {
+  Future<Uint8List> generateReceiptPDF() async {
     final pdf = pw.Document();
     // Loading assets image
     Uint8List truckImageBytes = await rootBundle
@@ -1138,11 +1135,9 @@ class _ProductDetailsState extends State<ProductDetails> {
       ),
     );
 
-    final output = await getTemporaryDirectory();
-    final file = File("${output.path}/receipt.pdf");
-    await file.writeAsBytes(await pdf.save());
-    await Printing.sharePdf(bytes: await pdf.save(), filename: 'receipt.pdf');
-    return file;
+    final pdfOut = await pdf.save();
+    await Printing.sharePdf(bytes: pdfOut, filename: 'receipt.pdf');
+    return pdfOut;
   }
 
   pw.Widget buildProductTablePdf({
@@ -1282,7 +1277,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       MaterialPageRoute(builder: (context) => SignaturePad()),
     );
 
-    if (result != null && result is String) {
+    if (result != null && result is Uint8List) {
       setState(() {
         _signaturePath = result;
       });

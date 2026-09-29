@@ -1,6 +1,5 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:signature/signature.dart';
 import 'package:flutter/services.dart';
 
@@ -25,20 +24,12 @@ class _SignaturePadState extends State<SignaturePad> {
         // convert sign to img
         Uint8List? signatureImage = await _signatureController.toPngBytes();
         if (signatureImage != null) {
-          // Get the app's document directory
-          final directory = await getApplicationDocumentsDirectory();
-          final filePath = "${directory.path}/signature.png";
-
-          //Save img
-          File file = File(filePath);
-          await file.writeAsBytes(signatureImage);
-
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(" Signature saved at :$filePath")),
+            SnackBar(content: Text(" Signature saved")),
           );
 
-          //Return filepath to previous screen
-          Navigator.pop(context,filePath);
+          //Return signature bytes to previous screen
+          Navigator.pop(context, signatureImage);
         }
       } catch (e) {
         ScaffoldMessenger.of(context)

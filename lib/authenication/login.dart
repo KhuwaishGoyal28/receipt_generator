@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'mock_auth.dart';
 import '../layouts/home.dart';
 import 'register.dart';
 import 'package:receipt_generator/colors/color.dart';
@@ -12,7 +12,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
   bool _obscurePassword = true;
 
@@ -24,8 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _loginUser() async {
-    _auth.setLanguageCode("en");
-
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -39,20 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      User? user = userCredential.user;
-      if (user == null) {
-        throw FirebaseAuthException(
-          code: "user-null",
-          message: "User authentication failed.",
-        );
-      }
-
-      print("✅ Logged in as: ${user.email}");
+      await MockAuth.signIn(email, password);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Login Successful")),
@@ -64,15 +48,10 @@ class _LoginPageState extends State<LoginPage> {
           builder: (context) => HomePage(),
         ),
       );
-    } on FirebaseAuthException catch (e) {
-      print("❌ Firebase Auth Error: ${e.message}");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.message ?? 'An error occurred'}")),
-      );
     } catch (e) {
       print("❌ Unknown Login Error: ${e.toString()}");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Unknown error occurred: ${e.toString()}")),
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     } finally {
       setState(() => _isLoading = false);

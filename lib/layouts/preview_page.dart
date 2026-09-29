@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
-import 'dart:io';
+import 'dart:typed_data';
 
 class PdfPreviewPage extends StatelessWidget {
-  final File pdfFile;
+  final Uint8List pdfBytes;
 
-  PdfPreviewPage({required this.pdfFile});
+  PdfPreviewPage({required this.pdfBytes});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("PDF Preview")),
       body: PdfPreview(
-        build: (format) async => pdfFile.readAsBytes(),
+        build: (format) async => pdfBytes,
       ),
     );
   }
